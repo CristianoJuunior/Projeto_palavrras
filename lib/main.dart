@@ -1,33 +1,57 @@
 import 'package:flutter/material.dart';
-import './questao.dart';
-import './resposta.dart';
+import 'questionario.dart';
+import './resutado.dart';
 
 void main() => runApp(const PerguntaApp());
 
 class _PerguntaAppState extends State<PerguntaApp> {
   var _perguntaSelecionada = 0;
+  var _pontuacaoTotal = 0;
 
   final _perguntas = const [
     {
       'texto': 'Qual é a sua cor favorita?',
-      'respostas': ['Preto', 'Rosa', 'Azul', 'Lilas'],
+      'respostas': [
+        {'texto': 'Preto', 'pontuacao': 10},
+        {'texto': 'Rosa', 'pontuacao': 5},
+        {'texto': 'Azul', 'pontuacao': 2},
+        {'texto': 'Lilas', 'pontuacao': 1},
+      ],
     },
     {
       'texto': 'Qual é o seu animal favorito?',
-      'respostas': ['Cachorro', 'Gato', 'Hámster', 'Peixe'],
+      'respostas': [
+        {'texto': 'Cachorro', 'pontuacao': 10},
+        {'texto': 'Gato', 'pontuacao': 5},
+        {'texto': 'Peixe', 'pontuacao': 2},
+        {'texto': 'Sapo', 'pontuacao': 1},
+      ],
     },
     {
       'texto': 'Qual é o seu instrutor favorito?',
-      'respostas': ['Cristiano', 'Marcos', 'Lucas', 'Leo'],
+      'respostas': [
+        {'texto': 'Cristiano', 'pontuacao': 10},
+        {'texto': 'Lucas', 'pontuacao': 5},
+        {'texto': 'Marcos', 'pontuacao': 2},
+        {'texto': 'José', 'pontuacao': 1},
+      ],
     }
   ];
 
-  void _responder() {
+  void _responder(int pontuacao) {
     if (temPerguntaSelecionada) {
       setState(() {
         _perguntaSelecionada++;
+        _pontuacaoTotal += pontuacao;
       });
     }
+  }
+
+  void _reiniciarPerguntas() {
+    setState(() {
+      _perguntaSelecionada = 0;
+      _pontuacaoTotal = 0;
+    });
   }
 
   bool get temPerguntaSelecionada {
@@ -36,38 +60,25 @@ class _PerguntaAppState extends State<PerguntaApp> {
 
   @override
   Widget build(BuildContext context) {
-    List<String> respostas = temPerguntaSelecionada
-        ? _perguntas[_perguntaSelecionada].cast()['respostas']
-        : [];
-
-    //isso e declarativo:
-    //List<Widget> widgets = respostas.map((texto) => Resposta(texto, _responder)).toList()  ;
-    //--------
-    //isso aqui e imperativo:
-    // for (String textoResp in respostas) {
-    //   widgets.add(Resposta(textoResp, _responder));
-    // }
     return MaterialApp(
       home: Scaffold(
+        backgroundColor: Colors.lightBlueAccent,
         appBar: AppBar(
           title: const Text('Perguntas'),
+          backgroundColor: Colors.blue,
         ),
         body: temPerguntaSelecionada
             ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Questao(_perguntas[_perguntaSelecionada]['texto'].toString()),
-                  //spread sao os "..." => e pode ser usado para estender os elementos de uma coleção e também para concatenar coleções.
-                  ...respostas
-                      .map((texto) => Resposta(texto, _responder))
-                      .toList(),
+                  Questionario(
+                    perguntas: _perguntas,
+                    perguntaSelecionada: _perguntaSelecionada,
+                    quantoResponder: _responder,
+                  ),
                 ],
               )
-            : const Center(
-                child: Text(
-                  'Parabens !',
-                  style: TextStyle(fontSize: 29),
-                ),
-              ),
+            : Resultado(_pontuacaoTotal, _reiniciarPerguntas),
       ),
     );
   }
